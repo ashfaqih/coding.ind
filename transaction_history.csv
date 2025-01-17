@@ -1,0 +1,17 @@
+nama_buah,kategori,satuan,stok_awal,stok_masuk,stok_keluar,stok_akhir,tanggal_masuk
+durian,buah musiman,kg,0,100,30,70,2024-10-05
+manggis,buah musiman,kg,0,120,40,80,2024-10-15
+rambutan,buah musiman,kg,0,150,50,100,2024-10-20
+alpukat,buah musiman,kg,0,90,25,65,2024-10-25
+kesemek,buah musiman,kg,0,110,35,75,2024-11-05
+jeruk_manis,buah musiman,kg,0,130,45,85,2024-11-15
+salak,buah tropis,kg,0,140,50,90,2024-11-20
+jeruk_nipis,buah musiman,kg,0,160,60,100,2024-11-25
+durian,buah musiman,kg,70,125,45,150,2024-12-05
+rambutan,buah musiman,kg,100,155,55,200,2024-12-15
+manggis,buah musiman,kg,80,135,50,165,2024-12-20
+alpukat,buah musiman,kg,65,110,40,135,2024-12-25
+kesemek,buah musiman,kg,75,105,30,150,2025-01-05
+jeruk_manis,buah musiman,kg,85,115,35,165,2025-01-15
+belimbing,buah tropis,kg,0,125,40,85,2025-01-20
+melon,buah tropis,kg,0,145,50,95,2025-01-25
