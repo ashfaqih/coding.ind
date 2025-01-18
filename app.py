@@ -57,10 +57,12 @@ def load_data(uploaded_file):
             st.error("Maaf format csv yang diupload tidak sesuai dengan yang diinginkan.")
             return None
             
-        # Convert nama_buah to title case and replace underscore with space
-        df['nama_buah'] = df['Nama Buah'].str.title().str.replace('_', ' ')
-        # Convert tanggal_masuk to datetime
-        df['tanggal_masuk'] = pd.to_datetime(df['Tanggal Masuk'])
+        # Convert Nama Buah to title case and replace underscore with space
+        df['Nama Buah'] = df['Nama Buah'].str.title().str.replace('_', ' ')
+        
+        # Convert Tanggal Masuk to datetime and format it
+        df['Tanggal Masuk'] = pd.to_datetime(df['Tanggal Masuk']).dt.strftime('%Y-%m-%d')
+        
         return df
     except Exception as e:
         st.error("Maaf format csv yang diupload tidak sesuai dengan yang diinginkan.")
@@ -72,7 +74,7 @@ def predict_stock(nama_buah, month, historical_data):
         model = joblib.load('rcmmodel.joblib')
         
         # Filter data for the specific fruit
-        fruit_data = historical_data[historical_data['nama_buah'] == nama_buah].copy()
+        fruit_data = historical_data[historical_data['Nama Buah'] == nama_buah].copy()
         
         if len(fruit_data) == 0:
             return None
@@ -117,7 +119,7 @@ def show_predictions(month, month_name, historical_data):
     st.subheader("Rekomendasi Stok Lainnya")
     other_container = st.container()
     with other_container:
-        all_fruits = historical_data['nama_buah'].unique()
+        all_fruits = historical_data['Nama Buah'].unique()
         other_fruits = [f for f in all_fruits if f not in [x.title() for x in seasonal_fruits]]
         for fruit in other_fruits:
             prediction = predict_stock(fruit, month, historical_data)
