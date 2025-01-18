@@ -4,6 +4,7 @@ import numpy as np
 import joblib
 from datetime import datetime
 import calendar
+import io
 
 # Page configuration
 st.set_page_config(
@@ -28,17 +29,41 @@ def get_seasonal_fruits(month):
             return fruits
     return []
 
-def load_data():
+def validate_csv_format(df):
+    required_columns = ['ID', 'Nama Buah', 'Kategori', 'Satuan', 
+                       'Stok Awal', 'Stok Masuk', 'Stok Keluar', 
+                       'Stok Akhir', 'Tanggal Masuk']
+    
+    # Check if all required columns exist
+    if not all(col in df.columns for col in required_columns):
+        return False
+    
+    # Check data types
     try:
-        # Read CSV file
-        df = pd.read_csv('transaction_history.csv')
+        df['Tanggal Masuk'] = pd.to_datetime(df['Tanggal Masuk'])
+        df[['Stok Awal', 'Stok Masuk', 'Stok Keluar', 'Stok Akhir']] = \
+            df[['Stok Awal', 'Stok Masuk', 'Stok Keluar', 'Stok Akhir']].astype(float)
+        return True
+    except:
+        return False
+
+def load_data(uploaded_file):
+    try:
+        # Read uploaded CSV file
+        df = pd.read_csv(uploaded_file)
+        
+        # Validate format
+        if not validate_csv_format(df):
+            st.error("Maaf format csv yang diupload tidak sesuai dengan yang diinginkan.")
+            return None
+            
         # Convert nama_buah to title case and replace underscore with space
-        df['nama_buah'] = df['nama_buah'].str.title().str.replace('_', ' ')
+        df['nama_buah'] = df['Nama Buah'].str.title().str.replace('_', ' ')
         # Convert tanggal_masuk to datetime
-        df['tanggal_masuk'] = pd.to_datetime(df['tanggal_masuk'])
+        df['tanggal_masuk'] = pd.to_datetime(df['Tanggal Masuk'])
         return df
     except Exception as e:
-        st.error(f"Error loading data: {str(e)}")
+        st.error("Maaf format csv yang diupload tidak sesuai dengan yang diinginkan.")
         return None
 
 def predict_stock(nama_buah, month, historical_data):
@@ -53,10 +78,10 @@ def predict_stock(nama_buah, month, historical_data):
             return None
         
         # Calculate features
-        avg_stok_masuk = fruit_data['stok_masuk'].astype(float).mean()
-        std_stok_masuk = fruit_data['stok_masuk'].astype(float).std()
-        avg_stok_keluar = fruit_data['stok_keluar'].astype(float).mean()
-        std_stok_keluar = fruit_data['stok_keluar'].astype(float).std()
+        avg_stok_masuk = fruit_data['Stok Masuk'].astype(float).mean()
+        std_stok_masuk = fruit_data['Stok Masuk'].astype(float).std()
+        avg_stok_keluar = fruit_data['Stok Keluar'].astype(float).mean()
+        std_stok_keluar = fruit_data['Stok Keluar'].astype(float).std()
         
         # Check seasonality
         is_seasonal = 1 if nama_buah in get_seasonal_fruits(month) else 0
@@ -73,94 +98,77 @@ def predict_stock(nama_buah, month, historical_data):
         st.error(f"Error in prediction: {str(e)}")
         return None
 
+def show_predictions(month, month_name, historical_data):
+    st.header(f"Prediksi Bulan {month_name}")
+    
+    # Get seasonal fruits for the selected month
+    seasonal_fruits = get_seasonal_fruits(month)
+    
+    # Seasonal Fruits Section
+    st.subheader("Buah Musiman")
+    seasonal_container = st.container()
+    with seasonal_container:
+        for fruit in seasonal_fruits:
+            prediction = predict_stock(fruit.title(), month, historical_data)
+            if prediction:
+                st.info(f"{fruit}: {prediction} unit")
+
+    # Other Fruits Section
+    st.subheader("Rekomendasi Stok Lainnya")
+    other_container = st.container()
+    with other_container:
+        all_fruits = historical_data['nama_buah'].unique()
+        other_fruits = [f for f in all_fruits if f not in [x.title() for x in seasonal_fruits]]
+        for fruit in other_fruits:
+            prediction = predict_stock(fruit, month, historical_data)
+            if prediction:
+                st.success(f"{fruit}: {prediction} unit")
+
 def main():
     st.title("Prediksi Musim Buah")
 
-    # Get current and next month
-    current_month = datetime.now().month
-    next_month = current_month % 12 + 1
+    # File uploader
+    uploaded_file = st.file_uploader("Upload file CSV transaksi", type=['csv'])
     
-    # Get month names
-    current_month_name = calendar.month_name[current_month]
-    next_month_name = calendar.month_name[next_month]
-
-    # Load historical data from CSV
-    historical_data = load_data()
-    if historical_data is None:
-        st.error("Gagal memuat data dari CSV. Pastikan file transaction_history.csv tersedia.")
-        return
-
-    # Create two columns for current and next month predictions
-    col1, col2 = st.columns(2)
-
-    # Current Month Predictions
-    with col1:
-        st.header(f"Prediksi Bulan Ini ({current_month_name})")
+    if uploaded_file is not None:
+        # Load historical data from uploaded CSV
+        historical_data = load_data(uploaded_file)
         
-        # Get seasonal fruits for current month
-        current_seasonal = get_seasonal_fruits(current_month)
-        
-        # Seasonal Fruits Section
-        st.subheader("Buah Musiman")
-        seasonal_container = st.container()
-        with seasonal_container:
-            for fruit in current_seasonal:
-                prediction = predict_stock(fruit.title(), current_month, historical_data)
-                if prediction:
-                    st.info(f"{fruit}: {prediction} unit")
+        if historical_data is not None:
+            # Get current and next month
+            current_month = datetime.now().month
+            next_month = current_month % 12 + 1
+            
+            # Get month names
+            current_month_name = calendar.month_name[current_month]
+            next_month_name = calendar.month_name[next_month]
 
-        # Other Fruits Section
-        st.subheader("Rekomendasi Stok Lainnya")
-        other_container = st.container()
-        with other_container:
-            all_fruits = historical_data['nama_buah'].unique()
-            other_fruits = [f for f in all_fruits if f not in [x.title() for x in current_seasonal]]
-            for fruit in other_fruits:
-                prediction = predict_stock(fruit, current_month, historical_data)
-                if prediction:
-                    st.success(f"{fruit}: {prediction} unit")
+            # Create dropdown for month selection
+            selected_month = st.selectbox(
+                "Pilih Bulan Prediksi",
+                ["Bulan Ini", "Bulan Depan"],
+                index=0
+            )
 
-    # Next Month Predictions
-    with col2:
-        st.header(f"Prediksi Bulan Depan ({next_month_name})")
-        
-        # Get seasonal fruits for next month
-        next_seasonal = get_seasonal_fruits(next_month)
-        
-        # Seasonal Fruits Section
-        st.subheader("Buah Musiman")
-        seasonal_container = st.container()
-        with seasonal_container:
-            for fruit in next_seasonal:
-                prediction = predict_stock(fruit.title(), next_month, historical_data)
-                if prediction:
-                    st.info(f"{fruit}: {prediction} unit")
+            # Show predictions based on selection
+            if selected_month == "Bulan Ini":
+                show_predictions(current_month, current_month_name, historical_data)
+            else:
+                show_predictions(next_month, next_month_name, historical_data)
 
-        # Other Fruits Section
-        st.subheader("Rekomendasi Stok Lainnya")
-        other_container = st.container()
-        with other_container:
-            all_fruits = historical_data['nama_buah'].unique()
-            other_fruits = [f for f in all_fruits if f not in [x.title() for x in next_seasonal]]
-            for fruit in other_fruits:
-                prediction = predict_stock(fruit, next_month, historical_data)
-                if prediction:
-                    st.success(f"{fruit}: {prediction} unit")
+            # Add some additional information
+            st.markdown("---")
+            st.markdown("""
+            ### Catatan:
+            - Prediksi stok didasarkan pada data historis dan faktor musiman
+            - Model mempertimbangkan rata-rata stok masuk dan keluar
+            - Buah musiman memiliki rekomendasi stok yang lebih tinggi
+            """)
 
-    # Add some additional information
-    st.markdown("---")
-    st.markdown("""
-    ### Catatan:
-    - Prediksi stok didasarkan pada data historis dan faktor musiman
-    - Model mempertimbangkan rata-rata stok masuk dan keluar
-    - Buah musiman memiliki rekomendasi stok yang lebih tinggi
-    - Data diambil dari file transaction_history.csv
-    """)
-
-    # Add data preview section
-    st.markdown("---")
-    st.subheader("Preview Data Transaksi")
-    st.dataframe(historical_data)
+            # Add data preview section
+            st.markdown("---")
+            st.subheader("Preview Data Transaksi")
+            st.dataframe(historical_data)
 
 if __name__ == "__main__":
     main()
