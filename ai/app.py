@@ -71,7 +71,7 @@ def load_data(uploaded_file):
 def predict_stock(nama_buah, month, historical_data):
     try:
         # Muat model
-        model = joblib.load('rcmmodel.joblib')
+        model = joblib.load('ai/rcmmodel.joblib')
         
         # Filter data untuk buah tertentu
         fruit_data = historical_data[historical_data['Nama Buah'] == nama_buah].copy()
