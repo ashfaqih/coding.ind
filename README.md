@@ -1,6 +1,13 @@
 # Coding.IND
 
-Coding.IND adalah proyek untuk memprediksi stok dan musim buah di Indonesia menggunakan teknologi modern. Proyek ini terdiri dari dua bagian utama, yaitu Web Admin untuk pengelolaan data dan Model Prediksi untuk memberikan informasi prediksi kepada pengguna.
+Coding.IND merupakan sebuah tim dengan tagline berikut:
+
+*"Coding.IND: Innovating Digital Solutions for Indonesia"*
+
+Menekankan fokus tim dalam menciptakan solusi digital inovatif untuk pasar Indonesia.
+
+## Tentang Proyek
+Proyek ini bertujuan untuk membuat web admin gudang buah untuk PT Hasan Agrojaya. Proyek ini juga dilengkapi dengan tambahan AI Prediksi Rekomendasi Stok dan Musim Buah berdasarkan data transaksi selama 3 bulan terakhir, menggunakan algoritma Random Forest Regressor dengan metode ensemble learning.
 
 ## 📦 Deploy Aplikasi
 
