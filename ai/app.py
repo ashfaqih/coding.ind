@@ -175,10 +175,12 @@ def show_predictions(month, month_name, historical_data):
                         st.write(f"Rata-rata stok keluar: {int(info['avg_stok_keluar'])} {row['satuan']}")
 
 def main():
-    st.title("Sistem Prediksi Stok Buah")
-    st.markdown("""
-    Sistem ini membantu memprediksi stok optimal untuk berbagai jenis buah 
-    berdasarkan data historis, tren penjualan, dan faktor musiman.
+    st.title('Website Sistem Prediksi Rekomendasi Stok Musim Buah')
+    st.write("""
+        Selamat datang di **Website Sistem Prediksi Rekomendasi Stok Musim Buah**. Website ini dirancang untuk mengunggah file CSV dari tabel data transaksi dan 
+        mendapatkan rekomendasi stok buah pada bulan ini dan bulan depan.
+        
+        Unggah File CSV dari tabel data transaksi yang kamu unduh pada halaman tabel data untuk melihat rekomendasi stok buah bulan ini dan bulan depan.
     """)
 
     # File uploader
