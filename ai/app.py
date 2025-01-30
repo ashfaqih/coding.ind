@@ -221,10 +221,14 @@ def main():
             - Tren penjualan negatif menurunkan rekomendasi stok sebesar 20%
             """)
 
-            # Data preview
+            # Data preview with formatted date
             st.markdown("---")
             st.subheader("Preview Data Transaksi")
-            st.dataframe(historical_data)
+            # Create a copy of the dataframe to avoid modifying the original
+            display_df = historical_data.copy()
+            # Convert datetime to date for display
+            display_df['tanggal_masuk'] = display_df['tanggal_masuk'].dt.date
+            st.dataframe(display_df)
 
 if __name__ == "__main__":
     main()
