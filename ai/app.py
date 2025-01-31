@@ -74,8 +74,8 @@ def predict_optimal_stock(nama_buah, satuan, month, historical_data):
     """Predict optimal stock levels using the trained model"""
     try:
         # Load the saved model and label encoder
-        model = joblib.load('ai/stock_model2.joblib')
-        le_satuan = joblib.load('ai/unit_encoder2.joblib')
+        model = joblib.load('ai/stock_model3.joblib')
+        le_satuan = joblib.load('ai/unit_encoder3.joblib')
         
         # Filter data for the specific fruit and unit
         fruit_data = historical_data[
